@@ -12,3 +12,111 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum ApprovalStatus {
+  APPROVED
+  DENIED
+  PENDING
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AttractionType {
+  BRIDGE
+  TEMPLE
+  CHURCH
+  CASTLE
+  TRAIL
+  SHOPPING
+  PARK
+  LANDMARK
+  ETC
+}
+
+enum Season {
+  FALL
+  SUMMER
+  SPRING
+  WINTER
+}
+
+model User {
+  id String @db.Uuid @default(uuid())
+  username String @db.VarChar(32)
+  email String @unique
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+}
+
+model Attraction {
+  id String @db.Uuid @default(uuid())
+  name String
+  type Attraction_Type @default(ETC)
+  desc String
+  location Json?
+  metatags String[]
+  metadata Json
+  reviewStatus ApprovalStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+}
+
+model AttractionStat {
+ id String @db.Uuid @default(uuid())
+ attr Attractions @relation(fields: [attrId], references: [id])
+ attrId String
+ avgStar Float?
+ visitors Int
+ peakHour DateTime[]? @db.time(2)
+ peakSeason Season[]?
+ createdAt DateTime @default(now())
+ updatedAt DateTime? @updatedAt
+}
+
+model AttractionPublicCollector {
+  id String @db.Uuid @default(uuid())
+  attrStat AttractionStats @relation (fields: [statId], references: [id])
+  statId String @db.UUid
+  estWait Int
+  visitDate DateTime
+  createdAt DateTime @default(now())
+}
+
+model AttractionPhoto {
+  id String @db.Uuid @default(uuid())
+  link String
+  desc String
+  user User @relation(fields: [userId], references: [id])
+  userId String @db.UUid
+  attr Attractions @relation(fields: [attrId], references: [id])
+  attrId String @db.UUid
+  approved ApprovalStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Reviews {
+  id String @db.Uuid @default(uuid())
+  body String
+  star Int
+  user User @relation(fields: [userId], references: [id])
+  userId String @db.UUid
+  attr Attractions @relation(fields: [attrId], references: [id])
+  attrId String @db.UUid
+  approved ApprovalStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Follow {
+  follower User @relation(fields: [followingId], references: [id])
+  followingId
+  followed User @relation(fields: [followedId], references: [id])
+  followedId
+}
