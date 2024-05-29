@@ -1,13 +1,19 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import routes from "./routes";
 
 dotenv.config();
 
+const prisma = new PrismaClient();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
+app.use("/", routes);
+
+app.use((_req, _res, next) => {
+  const err = new Error("The requested resource couldn't be found.");
+  next(err);
 });
 
 app.listen(port, () => {
