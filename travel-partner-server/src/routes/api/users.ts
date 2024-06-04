@@ -4,7 +4,6 @@ import { isValidEmail } from "../../utils/validation";
 import { generateIdFromEntropySize } from "lucia";
 import { hash } from "@node-rs/argon2";
 import express, { Express, Request, Response } from "express";
-import { hashSync, compare } from "bcryptjs";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -85,4 +84,6 @@ router.post("/signup", async (req: Request, res: Response, next) => {
     });
   }
 });
+
+router.post("/login", async (req: Request, res: Response, next) => {});
 export default router;
