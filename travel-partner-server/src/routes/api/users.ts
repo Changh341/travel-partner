@@ -84,7 +84,7 @@ router.post("/login", async (req: Request, res: Response, next) => {
     res.status(400);
     res.send("Invalid email");
   }
-  const password = formData.get("password");
+  const password = formData.password;
   if (!password || typeof password !== "string") {
     return new Response(null, {
       status: 400,
