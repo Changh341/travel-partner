@@ -54,9 +54,17 @@ model User {
   attrPhoto AttractionPhoto[]
   followedBy Follow[] @relation("following")
   following  Follow[] @relation("follower")
+  sessions Session[]
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
   deletedAt DateTime?
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
 model Attraction {
@@ -66,7 +74,7 @@ model Attraction {
   desc String
   location Json?
   metatags String[]
-  metadata Json
+  metadata Json?
   reviewStatus ApprovalStatus @default(PENDING)
   attStat AttractionStat?
   reviews Review[]

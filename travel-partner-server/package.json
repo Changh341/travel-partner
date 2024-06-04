@@ -12,9 +12,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@lucia-auth/adapter-prisma": "^4.0.1",
     "@prisma/client": "^5.14.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "lucia": "^3.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
