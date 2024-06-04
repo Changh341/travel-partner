@@ -30,9 +30,8 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   const email = formData.email;
   const username = formData.username;
   if (!email || typeof email !== "string" || !isValidEmail(email)) {
-    return new Response("Invalid email", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid email");
   }
 
   const user = await prisma.user.findFirst({
@@ -42,16 +41,14 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   });
 
   if (user) {
-    return new Response("Username taken", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid username taken");
   }
 
   const password = formData.password;
   if (!password || typeof password !== "string" || password.length < 6) {
-    return new Response("Invalid password", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid password");
   }
   const passwordHash = await hash(password, {
     memoryCost: 19456,
@@ -61,7 +58,7 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   });
   const userId = generateIdFromEntropySize(10);
   try {
-    prisma.user.create({
+    await prisma.user.create({
       data: {
         id: userId,
         username,
@@ -71,17 +68,12 @@ router.post("/signup", async (req: Request, res: Response, next) => {
     });
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/",
-        "Set-Cookie": sessionCookie.serialize(),
-      },
-    });
+    res.status(302);
+    res.set({ Location: "/", "Set-Cookie": sessionCookie.serialize() });
+    res.send("Success");
   } catch {
-    return new Response("Email already used", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Email already taken");
   }
 });
 
@@ -89,9 +81,8 @@ router.post("/login", async (req: Request, res: Response, next) => {
   const formData = await req.body;
   const email = formData.email;
   if (!email || typeof email !== "string") {
-    return new Response("Invalid email", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid email");
   }
   const password = formData.get("password");
   if (!password || typeof password !== "string") {
@@ -107,9 +98,9 @@ router.post("/login", async (req: Request, res: Response, next) => {
   });
 
   if (!user) {
-    return new Response("Invalid email or password", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid email or password");
+    return;
   }
   const validPassword = await verify(user.password, password, {
     memoryCost: 19456,
@@ -118,18 +109,13 @@ router.post("/login", async (req: Request, res: Response, next) => {
     parallelism: 1,
   });
   if (!validPassword) {
-    return new Response("Invalid email or password", {
-      status: 400,
-    });
+    res.status(400);
+    res.send("Invalid email or password");
   }
   const session = await lucia.createSession(user.id, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: "/",
-      "Set-Cookie": sessionCookie.serialize(),
-    },
-  });
+  res.status(302);
+  res.set({ Location: "/", "Set-Cookie": sessionCookie.serialize() });
+  res.send("Success");
 });
 export default router;
