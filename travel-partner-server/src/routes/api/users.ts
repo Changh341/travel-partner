@@ -1,9 +1,9 @@
+import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { generateIdFromEntropySize } from "lucia";
+import { hash, verify } from "@node-rs/argon2";
 import { lucia } from "../../utils/auth";
 import { isValidEmail } from "../../utils/validation";
-import { generateIdFromEntropySize } from "lucia";
-import { hash } from "@node-rs/argon2";
-import express, { Express, Request, Response } from "express";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -85,5 +85,51 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   }
 });
 
-router.post("/login", async (req: Request, res: Response, next) => {});
+router.post("/login", async (req: Request, res: Response, next) => {
+  const formData = await req.body;
+  const email = formData.email;
+  if (!email || typeof email !== "string") {
+    return new Response("Invalid email", {
+      status: 400,
+    });
+  }
+  const password = formData.get("password");
+  if (!password || typeof password !== "string") {
+    return new Response(null, {
+      status: 400,
+    });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    return new Response("Invalid email or password", {
+      status: 400,
+    });
+  }
+  const validPassword = await verify(user.password, password, {
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
+  if (!validPassword) {
+    return new Response("Invalid email or password", {
+      status: 400,
+    });
+  }
+  const session = await lucia.createSession(user.id, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: "/",
+      "Set-Cookie": sessionCookie.serialize(),
+    },
+  });
+});
 export default router;
