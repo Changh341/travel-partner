@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import routes from "./routes";
 import { webcrypto } from "node:crypto";
+import { errorHandler } from "./utils/middleware";
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ app.use((_req, _res, next) => {
   const err = new Error("The requested resource couldn't be found.");
   next(err);
 });
+
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
