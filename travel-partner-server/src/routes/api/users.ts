@@ -30,8 +30,7 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   const email = formData.email;
   const username = formData.username;
   if (!email || typeof email !== "string" || !isValidEmail(email)) {
-    res.status(400);
-    res.send("Invalid email");
+    return res.status(400).send("Invalid email");
   }
 
   const user = await prisma.user.findFirst({
@@ -41,14 +40,12 @@ router.post("/signup", async (req: Request, res: Response, next) => {
   });
 
   if (user) {
-    res.status(400);
-    res.send("Invalid username taken");
+    return res.status(400).send("Invalid username taken");
   }
 
   const password = formData.password;
   if (!password || typeof password !== "string" || password.length < 6) {
-    res.status(400);
-    res.send("Invalid password");
+    return res.status(400).send("Invalid password");
   }
   const passwordHash = await hash(password, {
     memoryCost: 19456,
@@ -68,12 +65,12 @@ router.post("/signup", async (req: Request, res: Response, next) => {
     });
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    res.status(302);
-    res.set({ Location: "/", "Set-Cookie": sessionCookie.serialize() });
-    res.send("Success");
+    return res
+      .status(302)
+      .set({ Location: "/", "Set-Cookie": sessionCookie.serialize() })
+      .send("Success");
   } catch {
-    res.status(400);
-    res.send("Email already taken");
+    return res.status(400).send("Email already taken");
   }
 });
 
@@ -81,14 +78,11 @@ router.post("/login", async (req: Request, res: Response, next) => {
   const formData = await req.body;
   const email = formData.email;
   if (!email || typeof email !== "string") {
-    res.status(400);
-    res.send("Invalid email");
+    return res.status(400).send("Invalid email");
   }
   const password = formData.password;
   if (!password || typeof password !== "string") {
-    return new Response(null, {
-      status: 400,
-    });
+    return res.status(400).send("Empty password");
   }
 
   const user = await prisma.user.findUnique({
@@ -98,9 +92,7 @@ router.post("/login", async (req: Request, res: Response, next) => {
   });
 
   if (!user) {
-    res.status(400);
-    res.send("Invalid email or password");
-    return;
+    return res.status(400).send("Invalid email or password");
   }
   const validPassword = await verify(user.password, password, {
     memoryCost: 19456,
@@ -109,13 +101,13 @@ router.post("/login", async (req: Request, res: Response, next) => {
     parallelism: 1,
   });
   if (!validPassword) {
-    res.status(400);
-    res.send("Invalid email or password");
+    return res.status(400).send("Invalid email or password");
   }
   const session = await lucia.createSession(user.id, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
-  res.status(302);
-  res.set({ Location: "/", "Set-Cookie": sessionCookie.serialize() });
-  res.send("Success");
+  return res
+    .status(302)
+    .set({ Location: "/", "Set-Cookie": sessionCookie.serialize() })
+    .send("Success");
 });
 export default router;
