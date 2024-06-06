@@ -16,7 +16,7 @@ router.get("/", async (req: Request, res: Response, next) => {
     },
   });
 
-  if (attr.length) res.send(attr);
+  if (attr.length) return res.send(attr);
   next();
 });
 
@@ -29,7 +29,7 @@ router.get("/:attrId", async (req: Request, res: Response, next) => {
     },
   });
 
-  if (attr) res.send(attr);
+  if (attr) return res.send(attr);
   next();
 });
 
