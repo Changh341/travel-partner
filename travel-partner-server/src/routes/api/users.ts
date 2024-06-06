@@ -67,7 +67,10 @@ router.post("/signup", async (req: Request, res: Response, next) => {
     const sessionCookie = lucia.createSessionCookie(session.id);
     return res
       .status(302)
-      .set({ Location: "/", "Set-Cookie": sessionCookie.serialize() })
+      .set({
+        Location: `/api/users/${userId}`,
+        "Set-Cookie": sessionCookie.serialize(),
+      })
       .send("Success");
   } catch {
     return res.status(400).send("Email already taken");
@@ -107,7 +110,10 @@ router.post("/login", async (req: Request, res: Response, next) => {
   const sessionCookie = lucia.createSessionCookie(session.id);
   return res
     .status(302)
-    .set({ Location: "/", "Set-Cookie": sessionCookie.serialize() })
+    .set({
+      Location: `/api/users/${user.id}`,
+      "Set-Cookie": sessionCookie.serialize(),
+    })
     .send("Success");
 });
 export default router;
