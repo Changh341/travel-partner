@@ -3,8 +3,10 @@ import { lucia } from "./auth.js";
 import { verifyRequestOrigin } from "lucia";
 
 import type { Session, User } from "lucia";
+import { PrismaClient } from "@prisma/client";
 
 const app: Express = express();
+const prisma = new PrismaClient();
 
 export const errorHandler = (err: Error, req: Request, res: Response) => {
   if (err.status === 404) {
@@ -51,7 +53,21 @@ export const userValidation = app.use(async (req, res, next) => {
       lucia.createBlankSessionCookie().serialize()
     );
   }
-  res.locals.user = user;
+  const userData = await prisma.user.findFirst({
+    where: { id: user?.id },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  res.locals.user = {
+    id: user?.id as string,
+    email: userData?.email as string,
+    role: userData?.role as Role,
+  };
   res.locals.session = session;
   return next();
 });
@@ -59,7 +75,7 @@ export const userValidation = app.use(async (req, res, next) => {
 declare global {
   namespace Express {
     interface Locals {
-      user: User | null;
+      user: { id: string; email: string; role: Role } | null;
       session: Session | null;
     }
   }
