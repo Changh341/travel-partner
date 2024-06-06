@@ -21,7 +21,7 @@ router.get("/", async (req: Request, res: Response, next) => {
 
 router.post("/", async (req: Request, res: Response, next) => {
   if (!res.locals.user) {
-    return res.status(403).end();
+    return res.status(401).send("Unauthorized");
   }
 
   const { name, type, desc, location, metatags } = req.body;
@@ -46,9 +46,9 @@ router.get("/:attrId", async (req: Request, res: Response, next) => {
   next();
 });
 
-router.put("/attrId/approval", async (req: Request, res: Response, next) => {
+router.put("/:attrId/approval", async (req: Request, res: Response, next) => {
   if (!res.locals.user || res.locals.user.role !== "ADMIN") {
-    return res.status(403).end();
+    return res.status(401).send("Unauthorized");
   }
   const { attrId } = req.params;
   const { name, type, desc, location, metatags } = req.body;
