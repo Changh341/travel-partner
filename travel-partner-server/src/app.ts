@@ -3,7 +3,11 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import routes from "./routes";
 import { webcrypto } from "node:crypto";
-import { errorHandler } from "./utils/middleware";
+import {
+  csrfProtection,
+  errorHandler,
+  userValidation,
+} from "./utils/middleware";
 
 dotenv.config();
 
@@ -13,6 +17,8 @@ globalThis.crypto = webcrypto as Crypto;
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(csrfProtection);
+app.use(userValidation);
 app.use("/", routes);
 
 app.use((_req, _res, next) => {
