@@ -65,6 +65,10 @@ router.put("/:attrId/approval", async (req: Request, res: Response, next) => {
     },
   });
 
+  await prisma.attractionStat.create({
+    data: { attrId: attr.id },
+  });
+
   if (attr) return res.send(attr);
   next();
 });
