@@ -18,9 +18,14 @@ export const errorHandler = (err: Error, req: Request, res: Response) => {
 };
 
 export const csrfProtection = app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== "production") {
+    return next();
+  }
+
   if (req.method === "GET") {
     return next();
   }
+
   const originHeader = req.headers.origin ?? null;
   const hostHeader = req.headers.host ?? null;
   if (
