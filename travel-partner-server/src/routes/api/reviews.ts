@@ -3,11 +3,11 @@ import express, { Express, Request, Response } from "express";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.get("/:attrId", async (req: Request, res: Response, next) => {
-  const { attrId } = req.params;
+router.get("/:reviewId", async (req: Request, res: Response, next) => {
+  const { reviewId } = req.params;
   const reviews = await prisma.review.findMany({
     where: {
-      attrId,
+      id: reviewId,
     },
   });
   if (reviews.length) return res.send(reviews);
