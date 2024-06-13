@@ -4,9 +4,9 @@ import { PrismaClient } from "@prisma/client";
 import routes from "./routes";
 import { webcrypto } from "node:crypto";
 import {
-  csrfProtection,
   errorHandler,
   userValidation,
+  csrfProtection,
 } from "./utils/middleware";
 
 dotenv.config();
